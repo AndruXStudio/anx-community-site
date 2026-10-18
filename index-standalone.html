@@ -1,0 +1,563 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>ANX社区 · 广场、私信与发帖</title>
+  <meta name="description" content="ANX社区：广场动态、私信聊天、发帖与评论。支持深色模式、60 秒撤回。Android 客户端免费下载。">
+  <meta name="theme-color" content="#0f1419" media="(prefers-color-scheme: dark)">
+  <meta name="theme-color" content="#f4f7fb" media="(prefers-color-scheme: light)">
+  <meta name="color-scheme" content="light dark">
+  <link rel="canonical" href="https://andruxstudio.github.io/ANX-Community/">
+  <meta property="og:type" content="website">
+  <meta property="og:title" content="ANX社区 · 广场、私信与发帖">
+  <meta property="og:description" content="轻量社区客户端：广场、私信、发帖评论。官方测试 QQ 群 1130106545。">
+  <meta property="og:image" content="assets/icon.png">
+  <link rel="icon" href="assets/logo.svg" type="image/svg+xml">
+  <link rel="icon" href="assets/favicon-32.png" type="image/png" sizes="32x32">
+  <link rel="apple-touch-icon" href="assets/apple-touch-icon.png">
+  <style>
+:root {
+  color-scheme: light dark;
+  --hue: 220;
+  --bg: #f4f7fb;
+  --surface: #ffffff;
+  --surface-2: #e8eef5;
+  --text: #0f172a;
+  --muted: #5b6b7c;
+  --primary: #1a8cd8;
+  --primary-strong: #0b6bcb;
+  --on-primary: #ffffff;
+  --ring: rgba(26, 140, 216, 0.35);
+  --border: rgba(15, 23, 42, 0.08);
+  --shadow: 0 12px 40px rgba(15, 23, 42, 0.08);
+  --radius: 20px;
+  --font: "Google Sans", "Segoe UI", system-ui, -apple-system, "PingFang SC", "Noto Sans SC", sans-serif;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg: #0b0f14;
+    --surface: #151b24;
+    --surface-2: #1c2430;
+    --text: #e8eef5;
+    --muted: #9aa8b8;
+    --primary: #42aef8;
+    --primary-strong: #6bc2ff;
+    --on-primary: #041018;
+    --border: rgba(232, 238, 245, 0.1);
+    --shadow: 0 12px 40px rgba(0, 0, 0, 0.45);
+  }
+}
+
+* { box-sizing: border-box; }
+html { scroll-behavior: smooth; }
+body {
+  margin: 0;
+  font-family: var(--font);
+  background: var(--bg);
+  color: var(--text);
+  line-height: 1.55;
+  -webkit-font-smoothing: antialiased;
+}
+a { color: var(--primary-strong); text-decoration: none; }
+a:hover { text-decoration: underline; }
+img { display: block; max-width: 100%; }
+.skip {
+  position: absolute; left: -999px; top: 0;
+  background: var(--primary); color: var(--on-primary); padding: 8px 12px;
+}
+.skip:focus { left: 12px; z-index: 100; }
+
+.wrap {
+  width: min(1080px, calc(100% - 2rem));
+  margin-inline: auto;
+}
+
+/* top nav */
+.top {
+  position: sticky; top: 0; z-index: 50;
+  backdrop-filter: blur(16px);
+  background: color-mix(in srgb, var(--bg) 82%, transparent);
+  border-bottom: 1px solid var(--border);
+}
+.top__inner {
+  display: flex; align-items: center; gap: 1rem;
+  min-height: 64px;
+}
+.brand {
+  display: inline-flex; align-items: center; gap: .6rem;
+  font-weight: 800; color: var(--text); text-decoration: none;
+  letter-spacing: -0.02em;
+}
+.brand img { border-radius: 9px; }
+.brand--sm { font-size: .95rem; }
+.nav {
+  display: none; gap: 1.25rem; margin-left: auto; margin-right: .5rem;
+}
+.nav a { color: var(--muted); font-weight: 600; text-decoration: none; }
+.nav a:hover { color: var(--text); }
+@media (min-width: 800px) {
+  .nav { display: flex; }
+}
+
+.btn {
+  display: inline-flex; align-items: center; justify-content: center;
+  gap: .4rem;
+  border-radius: 999px;
+  padding: .65rem 1.15rem;
+  font-weight: 700;
+  border: 1px solid transparent;
+  cursor: pointer;
+  text-decoration: none !important;
+  transition: transform .15s ease, background .15s ease, box-shadow .15s ease;
+}
+.btn:active { transform: scale(0.98); }
+.btn--sm { padding: .45rem .9rem; font-size: .9rem; }
+.btn--xl { padding: .9rem 1.4rem; font-size: 1.05rem; }
+.btn--primary {
+  background: var(--primary);
+  color: var(--on-primary);
+  box-shadow: 0 6px 20px var(--ring);
+}
+.btn--primary:hover { background: var(--primary-strong); }
+.btn--ghost {
+  background: var(--surface);
+  color: var(--text);
+  border-color: var(--border);
+}
+.btn--ghost:hover { background: var(--surface-2); }
+
+/* hero */
+.hero { padding: 3rem 0 2rem; }
+.hero__grid {
+  display: grid; gap: 2.5rem; align-items: center;
+}
+@media (min-width: 900px) {
+  .hero__grid { grid-template-columns: 1.15fr 0.85fr; }
+}
+.eyebrow {
+  color: var(--primary-strong);
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: none;
+  margin: 0 0 .75rem;
+}
+.display {
+  font-size: clamp(2rem, 4vw + 1rem, 3.25rem);
+  line-height: 1.12;
+  letter-spacing: -0.03em;
+  font-weight: 800;
+  margin: 0 0 1rem;
+}
+.lede {
+  font-size: 1.125rem;
+  color: var(--muted);
+  max-width: 36rem;
+  margin: 0 0 1.5rem;
+}
+.hero__actions { display: flex; flex-wrap: wrap; gap: .75rem; margin-bottom: 1rem; }
+.meta { color: var(--muted); font-size: .95rem; margin: 0; }
+.meta strong { color: var(--text); }
+
+/* phone mock */
+.phone {
+  width: min(280px, 100%);
+  margin-inline: auto;
+  background: #111827;
+  border-radius: 32px;
+  padding: 12px;
+  box-shadow: var(--shadow), 0 0 0 1px rgba(255,255,255,.06);
+}
+.phone__notch {
+  width: 96px; height: 10px; border-radius: 999px;
+  background: #000; margin: 4px auto 10px;
+}
+.phone__screen {
+  background: #0f1419;
+  border-radius: 22px;
+  min-height: 420px;
+  padding: 14px 12px 12px;
+  display: flex; flex-direction: column; gap: 10px;
+  color: #e8eef5;
+}
+.mock-bar { padding: 4px 6px 8px; }
+.mock-title { font-weight: 800; font-size: 1.35rem; }
+.mock-card {
+  display: flex; gap: 10px; align-items: flex-start;
+  background: #1a222d; border-radius: 14px; padding: 12px;
+}
+.mock-avatar {
+  width: 40px; height: 40px; border-radius: 50%;
+  background: var(--c, #42AEF8);
+  display: grid; place-items: center;
+  font-weight: 800; color: #041018; flex-shrink: 0;
+}
+.mock-name { font-weight: 700; font-size: .95rem; }
+.mock-text { color: #9aa8b8; font-size: .85rem; margin-top: 2px; }
+.mock-nav {
+  margin-top: auto;
+  display: grid; grid-template-columns: repeat(3, 1fr);
+  background: #1a222d; border-radius: 999px; padding: 10px 6px;
+  text-align: center; font-size: .78rem; color: #9aa8b8; font-weight: 600;
+}
+.mock-nav .on { color: #42AEF8; }
+
+/* stats */
+.stats { padding: 0 0 1rem; }
+.stats__row {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 1rem;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 1.25rem 1rem;
+  box-shadow: var(--shadow);
+}
+@media (min-width: 700px) {
+  .stats__row { grid-template-columns: repeat(4, 1fr); }
+}
+.stat__n { font-weight: 800; font-size: 1.35rem; }
+.stat__l { color: var(--muted); font-size: .9rem; }
+
+/* sections */
+.section { padding: 3.5rem 0; }
+.section--tint {
+  background: color-mix(in srgb, var(--surface-2) 70%, transparent);
+  border-block: 1px solid var(--border);
+}
+.cards {
+  display: grid;
+  gap: 1rem;
+  margin-top: 2rem;
+  grid-template-columns: 1fr;
+}
+@media (min-width: 700px) {
+  .cards { grid-template-columns: repeat(2, 1fr); }
+}
+@media (min-width: 1000px) {
+  .cards { grid-template-columns: repeat(3, 1fr); }
+}
+.mcard {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 1.25rem 1.2rem 1.35rem;
+  box-shadow: var(--shadow);
+}
+.mcard__head {
+  display: flex; align-items: center; gap: .75rem;
+  margin-bottom: .65rem;
+}
+.mcard__head h3 { margin: 0; font-size: 1.15rem; }
+.mcard__icon {
+  width: 42px; height: 42px; border-radius: 12px;
+  display: grid; place-items: center;
+  background: var(--bg, #e8eef5);
+  color: var(--fg, #0b6bcb);
+  font-size: 1.1rem; font-weight: 700;
+}
+.mcard__body { margin: 0; color: var(--muted); }
+
+.sources {
+  display: grid; gap: 1rem; margin-top: 2rem;
+}
+@media (min-width: 800px) {
+  .sources { grid-template-columns: 1.2fr 1fr 1fr; }
+}
+.source {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 1.35rem 1.25rem;
+  box-shadow: var(--shadow);
+  display: flex; flex-direction: column; gap: .75rem;
+}
+.source h3 { margin: 0; }
+.source p { margin: 0; color: var(--muted); }
+.source .btn { align-self: flex-start; margin-top: .25rem; }
+.source__go { font-weight: 700; font-size: .95rem; }
+.points { margin: 0; padding-left: 1.1rem; color: var(--muted); }
+.points li { margin: .35rem 0; }
+
+.community {
+  display: grid; gap: 2rem; align-items: center;
+}
+@media (min-width: 800px) {
+  .community { grid-template-columns: 1.2fr 0.8fr; }
+}
+.qq-num { font-size: 1.25rem; margin: 0 0 1rem; }
+.qq-card {
+  background: linear-gradient(145deg, #1a8cd8, #42aef8 55%, #8965f5);
+  color: #fff;
+  border-radius: 24px;
+  padding: 2rem 1.5rem;
+  box-shadow: var(--shadow);
+  text-align: center;
+}
+.qq-card__badge {
+  display: inline-block;
+  background: rgba(255,255,255,.2);
+  padding: .25rem .7rem;
+  border-radius: 999px;
+  font-weight: 800;
+  margin-bottom: .75rem;
+}
+.qq-card__num {
+  font-size: clamp(1.8rem, 4vw, 2.4rem);
+  font-weight: 800;
+  letter-spacing: 0.04em;
+}
+.qq-card__sub { opacity: .9; margin-top: .35rem; }
+
+.foot {
+  border-top: 1px solid var(--border);
+  padding: 2rem 0 2.5rem;
+  color: var(--muted);
+  font-size: .92rem;
+}
+.foot__inner { display: grid; gap: .6rem; }
+.foot a { color: var(--muted); font-weight: 600; }
+.foot a:hover { color: var(--text); }
+
+</style>
+</head>
+<body>
+  <a class="skip" href="#main">跳到正文</a>
+
+  <header class="top">
+    <div class="wrap top__inner">
+      <a class="brand" href="#">
+        <img src="assets/logo.svg" width="36" height="36" alt="">
+        <span>ANX社区</span>
+      </a>
+      <nav class="nav" aria-label="主导航">
+        <a href="#features">功能</a>
+        <a href="#download">下载</a>
+        <a href="#community">社群</a>
+        <a href="https://github.com/AndruXStudio/ANX-Community" target="_blank" rel="noopener">GitHub</a>
+      </nav>
+      <a class="btn btn--primary btn--sm" href="#download">获取安装包</a>
+    </div>
+  </header>
+
+  <main id="main">
+    <section class="hero">
+      <div class="wrap hero__grid">
+        <div class="hero__copy">
+          <p class="eyebrow">AndruX Studio · 社区客户端</p>
+          <h1 class="display">在手机上逛广场、<br>聊私信、发帖。</h1>
+          <p class="lede">
+            ANX社区把动态广场、一对一私信和发帖评论收在一个轻量 App 里。
+            支持深色 / 浅色，发送后 60 秒内可撤回消息。
+          </p>
+          <div class="hero__actions">
+            <a class="btn btn--primary btn--xl" href="https://github.com/AndruXStudio/ANX-Community/releases/download/flutter-v1.5.7-38/ANX-Community-Flutter-1.5.7.apk">
+              下载 Android 安装包
+            </a>
+            <a class="btn btn--ghost btn--xl" href="https://github.com/AndruXStudio/ANX-Community" target="_blank" rel="noopener">
+              查看源码
+            </a>
+          </div>
+          <p class="meta">
+            最新正式包 <strong>Flutter 1.5.7</strong>
+            · Android 推荐 8.0+
+            · 免费使用
+          </p>
+        </div>
+        <div class="hero__visual" aria-hidden="true">
+          <div class="phone">
+            <div class="phone__notch"></div>
+            <div class="phone__screen">
+              <div class="mock-bar">
+                <span class="mock-title">广场</span>
+              </div>
+              <div class="mock-card">
+                <div class="mock-avatar" style="--c:#42AEF8">A</div>
+                <div>
+                  <div class="mock-name">AndruXStudio</div>
+                  <div class="mock-text">欢迎来到 ANX社区测试版</div>
+                </div>
+              </div>
+              <div class="mock-card">
+                <div class="mock-avatar" style="--c:#8965F5">L</div>
+                <div>
+                  <div class="mock-name">LEN</div>
+                  <div class="mock-text">私信和发帖都可用了</div>
+                </div>
+              </div>
+              <div class="mock-nav">
+                <span class="on">广场</span>
+                <span>私信</span>
+                <span>我的</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="stats">
+      <div class="wrap stats__row">
+        <div>
+          <div class="stat__n">广场</div>
+          <div class="stat__l">动态与评论</div>
+        </div>
+        <div>
+          <div class="stat__n">私信</div>
+          <div class="stat__l">一对一聊天</div>
+        </div>
+        <div>
+          <div class="stat__n">60s</div>
+          <div class="stat__l">消息可撤回</div>
+        </div>
+        <div>
+          <div class="stat__n">QQ</div>
+          <div class="stat__l">官方测试群</div>
+        </div>
+      </div>
+    </section>
+
+    <section class="section" id="features">
+      <div class="wrap">
+        <h2 class="display">从首页就能用到的能力。</h2>
+        <p class="lede">打开 App 就是三栏：广场、私信、我的。下面按模块说明。</p>
+
+        <div class="cards">
+          <article class="mcard">
+            <div class="mcard__head">
+              <span class="mcard__icon" style="--bg:#d6efff;--fg:#0b6bcb">⌂</span>
+              <h3>广场</h3>
+            </div>
+            <p class="mcard__body">浏览社区动态，点赞与评论。支持图文帖，按时间流展示。</p>
+          </article>
+          <article class="mcard">
+            <div class="mcard__head">
+              <span class="mcard__icon" style="--bg:#e8e0ff;--fg:#5b3cc4">💬</span>
+              <h3>私信</h3>
+            </div>
+            <p class="mcard__body">一对一会话列表与聊天页。发送后 60 秒内可撤回，双方显示「已撤回」。</p>
+          </article>
+          <article class="mcard">
+            <div class="mcard__head">
+              <span class="mcard__icon" style="--bg:#dff7e8;--fg:#1b7a45">✎</span>
+              <h3>发帖</h3>
+            </div>
+            <p class="mcard__body">从底栏发帖入口进入，写文字、可选配图，发布后出现在广场。</p>
+          </article>
+          <article class="mcard">
+            <div class="mcard__head">
+              <span class="mcard__icon" style="--bg:#ffe8d6;--fg:#b85c00">◐</span>
+              <h3>深色 / 浅色</h3>
+            </div>
+            <p class="mcard__body">跟随系统主题切换，夜间阅读更省眼。</p>
+          </article>
+          <article class="mcard">
+            <div class="mcard__head">
+              <span class="mcard__icon" style="--bg:#e8eef5;--fg:#334155">◎</span>
+              <h3>个人主页</h3>
+            </div>
+            <p class="mcard__body">查看资料、退出登录；后续会继续补头像与改名改密等设置。</p>
+          </article>
+          <article class="mcard">
+            <div class="mcard__head">
+              <span class="mcard__icon" style="--bg:#fde8f0;--fg:#b0104f">⚡</span>
+              <h3>轻量客户端</h3>
+            </div>
+            <p class="mcard__body">Flutter 构建，安装包约 23MB，适合日常刷帖和私信。</p>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <section class="section section--tint" id="download">
+      <div class="wrap">
+        <h2 class="display">获取 ANX社区。</h2>
+        <p class="lede">当前推荐安装 Flutter 正式包。安装前请允许「未知来源」或按系统提示安装。</p>
+
+        <div class="sources">
+          <article class="source">
+            <h3>GitHub Releases</h3>
+            <p>官方构建的完整 APK，版本 <strong>1.5.7</strong>。更新也优先发在这里。</p>
+            <a class="btn btn--primary" href="https://github.com/AndruXStudio/ANX-Community/releases/download/flutter-v1.5.7-38/ANX-Community-Flutter-1.5.7.apk">
+              下载 APK（约 23.8 MB）
+            </a>
+            <a class="source__go" href="https://github.com/AndruXStudio/ANX-Community/releases" target="_blank" rel="noopener">全部版本 →</a>
+          </article>
+          <article class="source">
+            <h3>源代码</h3>
+            <p>客户端开源在 GitHub，可自行编译或提 Issue / PR。</p>
+            <a class="btn btn--ghost" href="https://github.com/AndruXStudio/ANX-Community" target="_blank" rel="noopener">
+              打开仓库
+            </a>
+          </article>
+          <article class="source note">
+            <h3>使用说明</h3>
+            <ul class="points">
+              <li>Android 8.0 及以上更佳</li>
+              <li>首次需登录 / 注册账号</li>
+              <li>测试阶段功能会持续迭代</li>
+              <li>遇到问题请加官方测试群反馈</li>
+            </ul>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <section class="section" id="community">
+      <div class="wrap community">
+        <div>
+          <h2 class="display">官方测试 QQ 群</h2>
+          <p class="lede">加群获取测试包、反馈 Bug、参与讨论。</p>
+          <p class="qq-num">群号 <strong>1130106545</strong></p>
+          <div class="hero__actions">
+            <a class="btn btn--primary btn--xl" href="https://qm.qq.com/cgi-bin/qm/qr?_wv=1027&group_code=1130106545" target="_blank" rel="noopener">
+              打开 QQ 加群
+            </a>
+            <button class="btn btn--ghost btn--xl" type="button" id="copy-qq" data-qq="1130106545">
+              复制群号
+            </button>
+          </div>
+          <p class="meta" id="copy-hint" hidden>已复制群号</p>
+        </div>
+        <div class="qq-card" aria-hidden="true">
+          <div class="qq-card__badge">QQ</div>
+          <div class="qq-card__num">1130106545</div>
+          <div class="qq-card__sub">ANX社区 · 官方测试群</div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer class="foot">
+    <div class="wrap foot__inner">
+      <div class="brand brand--sm">
+        <img src="assets/logo.svg" width="28" height="28" alt="">
+        <span>ANX社区</span>
+      </div>
+      <p>© AndruX Studio · 非官方第三方社区客户端 · 仅供测试交流</p>
+      <p>
+        <a href="https://github.com/AndruXStudio/ANX-Community">GitHub</a>
+        ·
+        <a href="#download">下载</a>
+        ·
+        <a href="#community">QQ 群 1130106545</a>
+      </p>
+    </div>
+  </footer>
+
+  <script>
+    document.getElementById('copy-qq')?.addEventListener('click', async () => {
+      const n = '1130106545';
+      try {
+        await navigator.clipboard.writeText(n);
+        const h = document.getElementById('copy-hint');
+        if (h) { h.hidden = false; setTimeout(() => h.hidden = true, 2000); }
+      } catch (e) {
+        prompt('复制群号', n);
+      }
+    });
+  </script>
+</body>
+</html>
